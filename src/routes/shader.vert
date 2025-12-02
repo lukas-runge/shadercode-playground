@@ -20,7 +20,7 @@ void main() {
     vec3(-0.5f, 0.5f, 0.5f)  // 7
     );
 
-				// Face indices (each face is 2 triangles)
+    // Face indices (each face is 2 triangles)
     int faces[36] = int[36](
     // Front face
     4, 5, 6, 4, 6, 7,
