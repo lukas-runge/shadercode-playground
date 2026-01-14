@@ -17,4 +17,4 @@ npm install -g pnpm && pnpm install
 npm run dev -- --open
 ```
 
-Enjoy! 🥳🙌e
+Enjoy! 🥳🙌
