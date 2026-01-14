@@ -1,63 +1,128 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import vertexShaderSource from './shader.vert?raw';
-	import fragmentShaderSource from './shader.frag?raw';
+	import ExampleCard from '$lib/components/ExampleCard.svelte';
+	import * as cubeExample from './examples/cube/example';
+	import * as objExample from './examples/obj/example';
 
-	let canvas: HTMLCanvasElement;
-
-	onMount(() => {
-		// Set canvas to fullscreen
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-
-		const gl = canvas.getContext('webgl2');
-		if (!gl) return;
-
-		// Compile shaders
-		const vertexShader = gl.createShader(gl.VERTEX_SHADER)!;
-		gl.shaderSource(vertexShader, vertexShaderSource);
-		gl.compileShader(vertexShader);
-
-		const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)!;
-		gl.shaderSource(fragmentShader, fragmentShaderSource);
-		gl.compileShader(fragmentShader);
-
-		// Create program
-		const program = gl.createProgram()!;
-		gl.attachShader(program, vertexShader);
-		gl.attachShader(program, fragmentShader);
-		gl.linkProgram(program);
-		gl.useProgram(program);
-
-		// Get uniform locations
-		const uTimeLocation = gl.getUniformLocation(program, 'uTime');
-		const uAspectLocation = gl.getUniformLocation(program, 'uAspect');
-
-		gl.uniform1f(uAspectLocation, canvas.width / canvas.height);
-
-		// Create empty VAO (required for WebGL2)
-		const vao = gl.createVertexArray();
-		gl.bindVertexArray(vao);
-
-		// Enable depth testing for 3D
-		gl.enable(gl.DEPTH_TEST);
-
-		// Animation loop
-		function render(time: number) {
-			if (!gl) return;
-
-			gl.clearColor(0.1, 0.1, 0.1, 1.0);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-			// Update time uniform
-			gl.uniform1f(uTimeLocation, time * 0.001);
-
-			gl.drawArrays(gl.TRIANGLES, 0, 36);
-			requestAnimationFrame(render);
+	const examples = [
+		{
+			id: 'cube',
+			title: 'Rotating Cube',
+			description:
+				'A colorful cube rendered with procedurally generated geometry in the vertex shader.',
+			href: '/examples/cube',
+			vertexShader: cubeExample.vertexShader,
+			fragmentShader: cubeExample.fragmentShader,
+			geometry: cubeExample.geometry
+		},
+		{
+			id: 'obj',
+			title: '3D OBJ Model',
+			description: 'Load and render 3D models from OBJ files with custom shaders.',
+			href: '/examples/obj',
+			vertexShader: objExample.vertexShader,
+			fragmentShader: objExample.fragmentShader,
+			geometry: objExample.geometry
 		}
-
-		requestAnimationFrame(render);
-	});
+	];
 </script>
 
-<canvas bind:this={canvas}></canvas>
+<div class="container">
+	<header>
+		<h1>ShaderCode Playground</h1>
+		<p class="subtitle">Explore WebGL shader examples and experiments</p>
+	</header>
+
+	<main>
+		<div class="examples-grid">
+			{#each examples as example}
+				<ExampleCard
+					title={example.title}
+					description={example.description}
+					href={example.href}
+					vertexShader={example.vertexShader}
+					fragmentShader={example.fragmentShader}
+					geometry={example.geometry}
+				/>
+			{/each}
+		</div>
+	</main>
+
+	<footer>
+		<p>Built with SvelteKit & WebGL</p>
+	</footer>
+</div>
+
+<style>
+	:global(body) {
+		margin: 0;
+		padding: 0;
+		background: #0f0f0f;
+		color: #fff;
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+	}
+
+	.container {
+		min-height: 100vh;
+		padding: 40px 20px;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	header {
+		text-align: center;
+		margin-bottom: 60px;
+	}
+
+	h1 {
+		font-size: 48px;
+		font-weight: 700;
+		margin: 0 0 16px 0;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.subtitle {
+		font-size: 20px;
+		color: #999;
+		margin: 0;
+	}
+
+	main {
+		margin-bottom: 60px;
+	}
+
+	.examples-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		gap: 30px;
+	}
+
+	footer {
+		text-align: center;
+		padding-top: 40px;
+		border-top: 1px solid #333;
+		color: #666;
+		font-size: 14px;
+	}
+
+	footer p {
+		margin: 0;
+	}
+
+	@media (max-width: 768px) {
+		h1 {
+			font-size: 36px;
+		}
+
+		.subtitle {
+			font-size: 16px;
+		}
+
+		.examples-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
